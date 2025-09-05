@@ -1,7 +1,7 @@
 import java.io.IOException;
 import java.net.*;
 import javax.imageio.IIOException;
-// java receptorUDP.java 1234
+// java remetenteUDP localhost 1234 mensagem!
 
 public class remetenteUDP {
     public static void main(String[] args) throws UnknownHostException, SocketException, IOException{

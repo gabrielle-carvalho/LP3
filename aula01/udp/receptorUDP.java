@@ -2,7 +2,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import javax.swing.JOptionPane;
-// java .\remetenteUDP.java localhost 1234 olaio
+// java receptorUDP 1234
 
 public class receptorUDP {
     public static void main(String[] args) {
