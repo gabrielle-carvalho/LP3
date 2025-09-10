@@ -1,3 +1,5 @@
+package calculadores;
+
 public class Calculadora{
     private double num1, num2;
     private char operacao;
@@ -26,30 +28,29 @@ public class Calculadora{
         return this.operacao;
     }
 
-
     private double soma(){
         return this.num1+this.num2;
     }
-    public double sub(){
+    private double sub(){
         return this.num1-this.num2;
     }
-    public double mult(){
+    private double mult(){
         return this.num1*this.num2;
     }
-    public double div(){
+    private double div(){
         return this.num1/this.num2;
     }
 
     public double calcular(){
         switch(this.operacao){
             case '+':
-                return this.soma();
+                return soma();
             case '-':
-                return this.sub();
+                return sub();
             case '*':
-                return this.mult();
+                return mult();
             case '/':
-                return this.div();
+                return div();
             default:
                 System.out.println("operação inválida");
                 return 0;
