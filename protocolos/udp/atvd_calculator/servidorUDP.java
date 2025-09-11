@@ -12,6 +12,7 @@ public class servidorUDP {
             System.err.println("Uso correto: <nome da maquina> <Porta>");
             System.exit(0);
         }
+
         try {
             InetAddress addr = InetAddress.getByName(args[0]);
             int port = Integer.parseInt(args[1]);
@@ -49,9 +50,9 @@ public class servidorUDP {
                 System.err.println("Mensagem enviada para: " + pkg.getAddress().getHostAddress() + "Porta: " + pkg.getPort() + "\n" + resultado);
                 
             }
-
             ds.close();
-        } catch (IIOException ioe) {
+        } 
+        catch (IIOException ioe) {
         }
     }
 }

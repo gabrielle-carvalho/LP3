@@ -12,6 +12,7 @@ public class receptorUDP {
             System.err.println("<nome da maquina> <Porta> <numero 1> <numero 2> <operacao>");
             System.exit(0);
         }
+
         try {
             InetAddress addr = InetAddress.getByName(args[0]);
             int port = Integer.parseInt(args[1]);
@@ -34,8 +35,8 @@ public class receptorUDP {
             String resultado = new String(resposta.getData()).trim(); //tira espacos
             JOptionPane.showMessageDialog(null, resultado, "resultado da operacao", JOptionPane.INFORMATION_MESSAGE);
             ds.close();
-
         } 
+        
         catch (IOException ioe) {
         }
     }
