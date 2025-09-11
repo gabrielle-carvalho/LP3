@@ -4,7 +4,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 import javax.swing.JOptionPane;
-// java receptorUDP 1234 10 10 -
+// java receptorUDP localhost 1234 10 10 +
 
 public class receptorUDP {
     public static void main(String[] args) {

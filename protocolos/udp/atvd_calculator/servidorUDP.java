@@ -4,7 +4,7 @@ import javax.imageio.IIOException;
 
 import calculadores.Calculadora;
 
-// java servidoreUDP localhost 1234
+// java servidorUDP localhost 1234
 
 public class servidorUDP {
     public static void main(String[] args) throws UnknownHostException, SocketException, IOException{
@@ -17,25 +17,41 @@ public class servidorUDP {
             int port = Integer.parseInt(args[1]);
 
             DatagramSocket ds = new DatagramSocket(port);
-            byte[] msg = new byte[256];
-            DatagramPacket pkg = new DatagramPacket(msg, msg.length);
-            ds.receive(pkg);
-            String [] partes = (new String(pkg.getData())).trim().split(" ");
-            int num1 = Integer.parseInt(partes[0]);
-            int num2 = Integer.parseInt(partes[1]);
-            char op = partes[2].charAt(0);
+            while (true) {
 
-            Calculadora calc = new Calculadora(num1, num2, op);
-            String resultado = "Resultado: " + calc.calcular();
+                byte[] msg = new byte[256];
+                DatagramPacket pkg = new DatagramPacket(msg, msg.length);
+                ds.receive(pkg);
 
-            byte[] resultadoBytes = resultado.getBytes();
-            DatagramPacket pacote = new DatagramPacket(resultadoBytes, resultadoBytes.length, pkg.getAddress(), pkg.getPort());
-            ds.send(pacote);
-            System.err.println("Mensagem enviada para: " + pkg.getAddress().getHostAddress() + "Porta: " + pkg.getPort() + "\n" + resultado);
-            ds.close(); 
-        } 
-        
-        catch (IIOException ioe) {
+                String recebido = new String(pkg.getData()).trim();
+                String[] partes = recebido.split(" ");
+
+                if (partes[0].equalsIgnoreCase("exit")) {
+                    System.out.println("Encerrando servidor...");
+                    break;
+                }
+
+                if (partes.length < 3) {
+                    System.out.println("Mensagem inválida recebida: " + recebido);
+                    continue;
+                }
+
+                int num1 = Integer.parseInt(partes[0]);
+                int num2 = Integer.parseInt(partes[1]);
+                char op = partes[2].charAt(0);
+
+                Calculadora calc = new Calculadora(num1, num2, op);
+                String resultado = "Resultado: " + calc.calcular();
+
+                byte[] resultadoBytes = resultado.getBytes();
+                DatagramPacket pacote = new DatagramPacket(resultadoBytes, resultadoBytes.length, pkg.getAddress(), pkg.getPort());
+                ds.send(pacote);
+                System.err.println("Mensagem enviada para: " + pkg.getAddress().getHostAddress() + "Porta: " + pkg.getPort() + "\n" + resultado);
+                
+            }
+
+            ds.close();
+        } catch (IIOException ioe) {
         }
     }
 }
