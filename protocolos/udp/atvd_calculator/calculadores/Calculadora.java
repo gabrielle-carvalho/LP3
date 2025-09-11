@@ -3,6 +3,7 @@ package calculadores;
 public class Calculadora{
     private double num1, num2;
     private char operacao;
+    
     public Calculadora (double num1, double num2, char operacao){
         this.num1=num1;
         this.num2=num2;
@@ -18,6 +19,8 @@ public class Calculadora{
     public void setNum2(double num2){
         this.num2=num2;
     }
+
+
     public double getNum1(){
         return this.num1;
     }
@@ -28,18 +31,20 @@ public class Calculadora{
         return this.operacao;
     }
 
+
     private double soma(){
-        return this.num1+this.num2;
+        return this.getNum1()+this.getNum2();
     }
     private double sub(){
-        return this.num1-this.num2;
+        return this.getNum1()-this.getNum2();
     }
     private double mult(){
-        return this.num1*this.num2;
+        return this.getNum1()*this.getNum2();
     }
     private double div(){
-        return this.num1/this.num2;
+        return this.getNum1()/this.getNum2();
     }
+
 
     public double calcular(){
         switch(this.operacao){
