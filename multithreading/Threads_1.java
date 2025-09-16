@@ -10,9 +10,10 @@ public class Threads_1 {
         Thread t3 = new Thread(r);
         t0.start(); //cria uma nova thread
         t2.start(); //cria uma nova thread
-        t1.run(); //usa thread principal
+        t1.start();
+        // t1.run(); //usa thread principal
         t3.start();
 
-        // System.out.println(t0.getName());
+
     }
 }
