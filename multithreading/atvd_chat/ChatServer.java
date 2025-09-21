@@ -33,25 +33,18 @@ private static final int PORT = 12345;
         @Override public void run() {
             try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));) {
                 out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
-                // 1) registrar cliente
-                clients.add(out);
+                clients.add(out); // 1) registrar cliente
 
-                // 2) dar boas-vindas
                 out.println("Bem-vindo! Digite mensagens. Use 'exit' para sair.");
                 
-                System.out.println("digite seu nick: ");
+                out.println("Digite seu nick: ");
                 String nick = in.readLine();
 
                 String txt = nick + ": entrou no seu chat!";
                 broadcast("[" + nick + "] " + txt , out);
 
-                // 3) laço principal de leitura
                 String line;
-                while ((line = in.readLine()) != null) {
-                    // TODO [Aluno]: se a linha for "exit", encerrar este cliente graciosamente (remover da lista e fechar socket).                    
-                    // TODO [Aluno]: fazer broadcast da mensagem para TODOS os outros clientes.
-                    //   - dica: itere sobre 'clients' e chame println(...)
-                    //   - não envie de volta para o próprio 'out' (opcional)
+                while ((line = in.readLine()) != null) { // 3) laço principal de leitura
                     if ("exit".equalsIgnoreCase(line.trim())) {
                         out.println("Você saiu do chat. Até logo!");
                         break;
@@ -59,17 +52,13 @@ private static final int PORT = 12345;
                     broadcast("[" + nick + "] " + line, out);
                 }
             } catch (IOException e) {
-                // queda de cliente é comum; logar e seguir
-                System.out.println("Cliente desconectou: " + e.getMessage());
+                System.out.println("Cliente desconectou: " + e.getMessage()); // queda de cliente é comum; logar e seguir
             } finally {
-                // 4) garantir limpeza
-                // TODO [Aluno]: remover o PrintWriter deste cliente de 'clients'
                 try { clients.remove(out); socket.close(); } catch (IOException ignore) {}
             }
         }
 
         private void broadcast(String msg, PrintWriter sender) {
-            // TODO [Aluno]: enviar 'msg' para todos em 'clients'.
             for (PrintWriter pw : clients) {
                 pw.println(msg);
             }

@@ -31,10 +31,10 @@ public class ChatClient {
             // Loop de envio (stdin -> servidor)
             String userLine;
             while (running.get() && (userLine = userIn.readLine()) != null) {
-                // TODO [Aluno]: enviar a linha ao servidor
-                
-                serverOut.println(userLine);
+                serverOut.println(userLine); // enviar a linha ao servidor
                 if ("exit".equalsIgnoreCase(userLine.trim())) {
+                    serverOut.close();
+                    socket.close();
                     break;
                 }
             }
