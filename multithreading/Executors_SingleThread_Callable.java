@@ -9,7 +9,9 @@ public class Executors_SingleThread_Callable {
     }
 
     public static class MeuRunnable implements Runnable{
-        String nome = Thread.currentThread().getName();
-        System.out.println(nome + "LP-III");
+        public void run(){
+            String nome = Thread.currentThread().getName();
+            System.out.println(nome + "LP-III");
+        }
     }
 }
