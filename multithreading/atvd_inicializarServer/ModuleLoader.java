@@ -23,8 +23,9 @@ public class ModuleLoader implements Runnable{
     @Override
     public void run(){
         try{
+            System.out.println("[CARREGANDO] Módulo " + moduleName);
             Thread.sleep(loadTime);
-            System.out.println(moduleName + "carregado");
+            System.out.println(moduleName + " carregado");
             serverInitializer.latch.countDown();
         } catch (InterruptedException e){
             e.printStackTrace();

@@ -19,7 +19,7 @@ módulo carregado.
  */
 
 public class ServerInitializer {
-    private static CountDownLatch latch = new CountDownLatch(4);
+    static CountDownLatch latch = new CountDownLatch(4);
 
     public static void waitForInitialization() throws InterruptedException{
             latch.await(); //espera as 4 threads terminarem
@@ -34,10 +34,10 @@ public class ServerInitializer {
         public static void main(String[] args) {
             java.util.concurrent.ExecutorService executor = Executors.newCachedThreadPool();
             ServerInitializer serverInitializer = new ServerInitializer();
-            executor.submit(new ModuleLoader("Configuração", (int)(Math.random() * 3000) + 1000, serverInitializer));
-            executor.submit(new ModuleLoader("“Segurança”", 2000, serverInitializer));
-            executor.submit(new ModuleLoader("Configuração", (int)(Math.random() * 2000) + 1000, serverInitializer));
-            executor.submit(new ModuleLoader("Configuração",  3000, serverInitializer));
+            executor.submit(new ModuleLoader("Conexão de log", (int)(Math.random() * 3000) + 1000, serverInitializer));
+            executor.submit(new ModuleLoader("Configuração", 2000, serverInitializer));
+            executor.submit(new ModuleLoader("Cache", (int)(Math.random() * 2000) + 1000, serverInitializer));
+            executor.submit(new ModuleLoader("Chaves de Criptografia",  3000, serverInitializer));
             executor.submit(() -> {
                 try {
                     ServerInitializer.startServer(); //so vai rodar depois que os outros 4 terminarem
@@ -48,6 +48,7 @@ public class ServerInitializer {
             }
 
         });
+        executor.shutdown();
     }
 }
 
