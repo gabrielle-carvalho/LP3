@@ -1,0 +1,9 @@
+Produtor-Consumidor: Como coordenar threads que produzem e consomem dados (usando BlockingQueue como a melhor solução).
+
+Locks/Synchronized: Como garantir que apenas uma thread acesse algo (exclusão mútua).
+
+Atomics: Uma forma mais eficiente de lidar com operações simples (como i++) sem usar locks.
+
+Semaphore: Como limitar o acesso a um recurso a um número específico de threads (ex: 3).
+
+CountDownLatch: Como fazer uma thread (ex: main) esperar que outras (ex: 3 threads de cálculo) terminem.
