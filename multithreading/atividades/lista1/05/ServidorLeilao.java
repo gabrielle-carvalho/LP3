@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -10,19 +11,17 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ServidorLeilao {
 
-    private static String itemEmLeilao = "Quadro Raro de Van Gogh";
+    private static String itemEmLeilao = "chaveirinho do bill";
     private static volatile double maiorLance = 0.0;
-    private static volatile String clienteComMaiorLance = "Ninguém";
+    private static volatile String clienteComMaiorLance = "Sem lances";
 
     private static final Object lockLeilao = new Object(); // Objeto usado como "chave" para sincronizar o acesso ao lance
 
     // CopyOnWriteArrayList para permitir o broadcast seguro
-    // (iterar na lista) enquanto novos clientes se conectam (modificar a lista).
     private static final List<PrintWriter> clientesConectados = new CopyOnWriteArrayList<>();
 
     public static void main(String[] args) {
-        int porta = 12347;
-
+        int porta = 1234;
         try (ServerSocket serverSocket = new ServerSocket(porta)) {
             System.out.println("Servidor de Leilão iniciado para o item: " + itemEmLeilao);
             System.out.println("Ouvindo na porta " + porta);
@@ -50,6 +49,7 @@ public class ServidorLeilao {
     private static class ClientHandler implements Runnable {
         private final Socket socket;
         private PrintWriter writer;
+        private String nomeCliente; // NOVO: Campo para guardar o nome do cliente
 
         public ClientHandler(Socket socket) {
             this.socket = socket;
@@ -60,25 +60,39 @@ public class ServidorLeilao {
             try (
                 OutputStream out = socket.getOutputStream();
                 PrintWriter w = new PrintWriter(out, true); // true = autoFlush
+                // printwriter transforma textos em byes e envia em out, o true manda a msg na hr pra n perder o fluxo do leilao
+                // OutputStream out bytes para SAÍDA.
+                // InputStream in bytes de ENTRADA.
+                //InputStreamReader traduz os bytes que chegam em caracteres
+                // BufferedReader reader junta os caracteres em linhas de texto (com readLine()).
+
                 BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()))
             ) {
                 this.writer = w;
+                writer.println("Bem-vindo ao leilão! Por favor, digite seu nome:");
+                this.nomeCliente = reader.readLine();
 
-                clientesConectados.add(writer); // 4a. ADICIONA O CLIENTE À LISTA DE BROADCAST
+                if (this.nomeCliente == null || this.nomeCliente.trim().isEmpty()) {
+                    System.out.println("Cliente desconectou antes de se identificar.");
+                    return;
+                }
+                System.out.println("Cliente " + this.nomeCliente + " (" + socket.getInetAddress() + ") entrou.");
+
+                clientesConectados.add(writer); // ADICIONA O CLIENTE À LISTA DE BROADCAST
 
                 // Envia o status atual para o novo cliente
-                writer.println("Bem-vindo ao leilão! Digite seu lance");
+                writer.println("Olá, " + this.nomeCliente + "! Você pode começar a dar lances.");
                 writer.println("Item: " + itemEmLeilao);
                 writer.println("Lance atual: R$ " + maiorLance + " (por: " + clienteComMaiorLance + ")");
                 
-                broadcast("Novo cliente entrou no leilão.");
+                broadcast(this.nomeCliente + " entrou no leilão.");
 
                 String linhaDoCliente;
                 while ((linhaDoCliente = reader.readLine()) != null) {
                     try {
                         double lance = Double.parseDouble(linhaDoCliente);
                         
-                        processarLance(lance, writer);
+                        processarLance(lance, this.nomeCliente, writer);
                         
                     } catch (NumberFormatException e) {
                         writer.println("Erro: Envie apenas números. (Ex: 150.50)");
@@ -91,7 +105,10 @@ public class ServidorLeilao {
                 if (writer != null) {
                     clientesConectados.remove(writer);
                 }
-                broadcast("Um cliente saiu do leilão.");
+                
+                String nomeParaAnuncio = (this.nomeCliente != null) ? this.nomeCliente : "Um cliente";
+                broadcast(nomeParaAnuncio + " saiu do leilão.");
+                
                 try {
                     socket.close();
                 } catch (IOException e) { /* ... */ }
@@ -99,16 +116,14 @@ public class ServidorLeilao {
         }
     }
 
-    private static void processarLance(double lance, PrintWriter clienteQueFezOLance) {
+    private static void processarLance(double lance, String nomeDoCliente, PrintWriter clienteQueFezOLance) {
         // Só uma thread por vez pode estar aqui
         // evita que dois lances cheguem ao mesmo tempo e causem uma condição de corrida
         synchronized (lockLeilao) {
             if (lance > maiorLance) {
                 maiorLance = lance;
-                // NOTA: Em um sistema real, pegaríamos o nome do cliente
-                clienteComMaiorLance = "Cliente " + clienteQueFezOLance.hashCode(); // Simulação
+                clienteComMaiorLance = nomeDoCliente;
 
-                // 6. NOTIFICA TODOS OS CLIENTES
                 // Notifica a todos sobre o novo lance maior 
                 broadcast("NOVO LANCE MAIOR: R$ " + maiorLance + " por " + clienteComMaiorLance);
                 
