@@ -49,7 +49,7 @@ public class ServidorLeilao {
     private static class ClientHandler implements Runnable {
         private final Socket socket;
         private PrintWriter writer;
-        private String nomeCliente; // NOVO: Campo para guardar o nome do cliente
+        private String nomeCliente;
 
         public ClientHandler(Socket socket) {
             this.socket = socket;
