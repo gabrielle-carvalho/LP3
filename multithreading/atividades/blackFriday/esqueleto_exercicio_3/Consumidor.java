@@ -20,12 +20,18 @@ class Consumidor implements Runnable {
     public void run() {
         try {
             while (true) {
-                
                 // TODO: Remover pedido da fila com timeout (poll com 5 segundos)
                 // Se null, significa que não há mais pedidos, pode encerrar
                 
                 // TODO: Processar pedido
                 // TODO: Se null, break do loop
+                Pedido pedido = fila.poll(5, TimeUnit.SECONDS);
+                if (pedido==null) {
+                    break;
+                }
+                else {
+                    processarPedido(pedido);
+                }
             }
             System.out.println("[Consumidor-" + id + "] Finalizou processamento");
         } catch (InterruptedException e) {
@@ -52,5 +58,16 @@ class Consumidor implements Runnable {
         // 2. Reservar estoque
         // 3. Simular processamento (100-300ms)
         // 4. Atualizar estatísticas
+        System.out.printf("[Consumidor-%d] Processando: %s\n", id, pedido.toString());
+        boolean sucesso = estoque.reservarEstoque(pedido.getProduto(), pedido.getQuantidade());
+        Thread.sleep(random.nextInt(200)+100);
+        if (sucesso){
+            stats.registrarPedidoProcessado();
+            System.out.println("sucesso");
+        }
+        else {
+            stats.registrarPedidoRejeitado();
+            System.out.println("sem estoque");
+        }
     }
 }
