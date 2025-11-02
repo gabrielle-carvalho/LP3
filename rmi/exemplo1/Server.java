@@ -11,10 +11,13 @@ public class Server extends UnicastRemoteObject implements Hello {
     }
     public static void main(String args[]){
         try {
-            LocateRegistry.getRegistry(1099);
+            LocateRegistry.createRegistry(1099);
+            // Quem usa createRegistry: O Servidor (em cenários simples).
+            // Crie a "lista telefônica".
+            // E depois se registre (rebind) nela.
             Server obj = new Server();
             Registry registry = LocateRegistry.getRegistry();
-            registry.rebind("HELLo", obj); // publicando objeto
+            registry.rebind("Hello", obj); // publicando objeto
             System.out.println("Server ready");
         } catch (Exception e) {
             System.out.println("Server exception: " + e.toString());

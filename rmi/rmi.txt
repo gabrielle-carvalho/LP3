@@ -1,0 +1,146 @@
+O que é RMI?
+
+Java RMI é um mecanismo para permitir a invocação de métodos que residem em diferentes máquinas virtuais Java (JVM). O JVM pode estar em diferentes máquinas ou podem estar na mesma máquina. Em ambos os casos, o método pode ser executado em um endereço diferente do processo de chamada. Java RMI é um mecanismo de chamada de procedimento remoto orientada a objetos.
+Aplicação de objetos distribuídos
+
+Uma aplicação RMI é frequentemente composto por dois programas diferentes, um servidor e um cliente. O servidor cria objetos remotos e faz referências a esses objetos disponíveis. Em seguida, ele é válido para clientes invocarem seus métodos sobre os objetos.
+
+O cliente executa referências remotas aos objetos remotos no servidor e invoca métodos nesses objetos remotos.
+
+O modelo de RMI fornece uma aplicação de objetos distribuídos para o programador. Ele é um mecanismo de comunicação entre o servidor e o cliente para se comunicarem e transmitirem informações entre si. A aplicação de objetos distribuídos tem de prover as seguintes propriedades:
+
+    Localização de objetos remotos: O sistema tem de obter referências a objetos remotos. Isto pode ser feito de duas maneiras. Ou, usando as instalações de nomeação do RMI, o registro RMI, ou passando e retornando objetos remotos.
+    Comunicação com objetos remotos: O desenvolvedor não tem de lidar com a comunicação entre os objetos remotos desde que este é tratado pelo sistema RMI.
+    Carregar os bytecodes de classe dos objetos que são transferidos como argumentos ou valores.
+
+Interfaces e Classes
+
+    Java RMI é um sistema de linguagem individual, a programação de aplicação distribuída em RMI é bastante simples. Todas as interfaces e classes para o sistema de RMI são definidos no pacote java.rmi. A classe de objeto remoto implementa a interface remota, enquanto as outras classes estendem RemoteObject.
+
+A interface remota
+
+    Deve estender-se a interface Remote.
+    Cada declaração de método na interface remota deve incluir a exceção RemoteException (ou uma de suas superclasses), em sua cláusula lançada.
+
+A classe RemoteObject
+
+Funções do servidor RMI são fornecidos pela classe RemoteObject e suas subclasses Remote Server, Activatable e UnicastRemoteObject. Aqui está uma breve descrição de como lidar com as diferentes classes:
+
+    RemoteObject fornece implementações dos métodos toString, equals e hashCode na classe java.lang.Object.
+    As classes UnicastRemoteObject e Activatable cria objetos remotos e os exporta, ou seja, essas classes fazem os objetos remotos usados por clientes remotos.
+
+
+A classe RemoteException
+
+A classe RemoteException é uma super-classe das exceções que o sistema RMI joga durante uma invocação de método remoto. Cada método remoto que é declarado em uma interface remota deve especificar RemoteException (ou uma de suas superclasses), em sua cláusula throws para garantir a robustez das aplicações no sistema RMI.
+
+Quando uma chamada de método remoto tiver um erro, a exceção RemoteException é lançada. Falha de comunicação, erros de protocolo e falha durante a triagem ou unmarshalling de parâmetros ou valores de retorno são algumas das razões para o fracasso da comunicação RMI. RemoteException é uma exceção que deve ser tratada pelo método chamador. O compilador confirma que o programador de ter lidado com essas exceções.
+
+
+
+
+O stub é um objeto substituto (proxy) que existe no lado do cliente e representa o objeto remoto que está realmente no servidor.
+
+📘 Função:
+
+Ele encapsula toda a lógica de comunicação entre cliente e servidor.
+
+Quando o cliente chama um método no stub, o stub:
+
+Empacota os parâmetros da chamada (serialização);
+
+Envia a requisição para o servidor (via rede);
+
+Aguarda a resposta;
+
+Desempacota o resultado (desserialização);
+
+Retorna o valor para o cliente.
+
+Assim, o cliente acha que está chamando um método local, quando na verdade está chamando um método remoto.
+
+    // Obter o stub do objeto remoto registrado no RMI Registry
+    Hello stub = (Hello) Naming.lookup("rmi://localhost:1099/Hello");
+
+    // Chamada de método remoto (na verdade, feita através do stub)
+    String response = stub.sayHello();
+    System.out.println("Resposta do servidor: " + response);
+Aqui, stub é o representante local do objeto remoto HelloImpl que está rodando no servidor.
+
+
+O método rebind() é usado no lado do servidor para registrar (ou atualizar) um objeto remoto no RMI Registry.
+
+📘 Função:
+
+Ele associa um nome (string) a um objeto remoto, tornando-o acessível aos clientes.
+
+Se já existir um objeto registrado com aquele nome, ele será substituído.
+
+É uma alternativa ao método bind(), que lança exceção se o nome já estiver em uso.
+
+import java.rmi.*;
+import java.rmi.registry.*;
+import java.rmi.server.*;
+
+public class Server {
+    public static void main(String[] args) {
+        try {
+            // Cria o objeto remoto
+            HelloImpl obj = new HelloImpl();
+
+            // Exporta o objeto (gera o stub automaticamente)
+            Hello stub = (Hello) UnicastRemoteObject.exportObject(obj, 0);
+
+            // Obtém o registro RMI
+            Registry registry = LocateRegistry.getRegistry();
+
+            // Associa o stub com o nome "Hello" no registro
+            registry.rebind("Hello", stub);
+
+            System.out.println("Servidor pronto.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+👉 Aqui, o registry.rebind("Hello", stub); registra o objeto remoto com o nome "Hello", tornando-o acessível aos clientes.
+
+
+3. Quando usar extends UnicastRemoteObject
+✅ Caso 1 — Usando extends UnicastRemoteObject
+
+Exemplo tradicional:
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+
+public class CalculadoraServidor extends UnicastRemoteObject implements Calculadora {
+    public CalculadoraServidor() throws RemoteException {
+        super(); // Exporta automaticamente o objeto remoto
+    }
+
+    @Override
+    public int soma(int x, int y) throws RemoteException {
+        return x + y;
+    }
+}
+E no main:
+Registry registry = LocateRegistry.createRegistry(1099);
+registry.rebind("Calculadora", new CalculadoraServidor());
+System.out.println("Servidor pronto...");
+👉 Aqui, você não precisa chamar exportObject(), porque a exportação acontece no construtor da superclasse UnicastRemoteObject.
+
+✅ Caso 2 — Sem herdar (exportObject() manualmente)
+
+No seu código atual, você fez assim:
+CalculadoraServidor server = new CalculadoraServidor();
+Calculadora stub = (Calculadora) UnicastRemoteObject.exportObject(server, 0);
+registry.rebind("Calculadora", stub);
+👉 Nesse caso:
+
+A classe não herda UnicastRemoteObject;
+
+Então você chama manualmente o método estático exportObject() para exportar o objeto e gerar o stub.
+
+Ou seja, extends UnicastRemoteObject e UnicastRemoteObject.exportObject() fazem a mesma coisa — apenas de formas diferentes.
+
+
