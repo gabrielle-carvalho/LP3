@@ -362,7 +362,25 @@ public class ServidorDespachante extends UnicastRemoteObject implements ServicoD
      * IMPORTANTE: Este método permite retry automático de matching
      */
     private void tratarFalhaConfirmacao(String atribuicaoId) {
-        // TODO: ALUNO DEVE IMPLEMENTAR ESTE MÉTODO
+        Motorista motorista = motoristas.get(atribuicaoId);
+        Atribuicao atribuicao = atribuicoes.get(atribuicaoId);
+        RequisicaoCorrida corrida = corridas.get(atribuicaoId);
+        if (atribuicao.isConfirmada()){
+            return;
+            log(String.format ("[FALHA] Corrida=%d Motorista=%d Motivo=TimeoutConfirmacao Reatribuindo=true", corrida.getCorridaId(), motorista.getInfo().getMotoristaId()));
+        }
+
+        motorista.setStatus(DISPONIVEL);
+        motorista.setAtribuicaoAtual(null);
+
+        corrida.setMotoristaAtribuido(null);
+        corrida.setAtribuicaoId(null);
+        corrida.setStatus(PENDENTE);
+
+        atribuicao.remove(atribuicaoId);
+        executorMatching.submit(() -> processarMatching(corrida)); //ver oq é isso!!!!!!!
+        
+
         
         throw new UnsupportedOperationException("ALUNO: Implemente o método tratarFalhaConfirmacao");
     }
