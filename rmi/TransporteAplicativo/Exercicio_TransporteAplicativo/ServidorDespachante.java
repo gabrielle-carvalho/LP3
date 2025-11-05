@@ -246,7 +246,8 @@ public class ServidorDespachante extends UnicastRemoteObject implements ServicoD
             lockMatching.lock();
             Motorista melhorMotorista = encontrarMelhorMotorista(requisicao);
             if(melhorMotorista==null){
-                verificarTimeoutMatching(requisicao.getCorridaId());
+                // verificarTimeoutMatching(requisicao.getCorridaId());
+                log("nenhum motorista foi encontrado para essa corrida");
             }
             else{
                 String atribuicaoId = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
@@ -293,6 +294,14 @@ public class ServidorDespachante extends UnicastRemoteObject implements ServicoD
      */
     private Motorista encontrarMelhorMotorista(RequisicaoCorrida requisicao) {
         // TODO: ALUNO DEVE IMPLEMENTAR ESTE MÉTODO
+        for (Motorista motorista : motoristas.values()){
+            if (motorista.isDisponivel()) {
+                double menorDistancia = calcularDistancia(requisicao.getOrigem(), requisicao.getDestino());
+                String idmot = motorista.getInfo().getMotoristaId();
+                Prioridade prioridade = requisicao.getPrioridade();
+
+            }
+        }
         
         throw new UnsupportedOperationException("ALUNO: Implemente o método encontrarMelhorMotorista");
     }
@@ -340,7 +349,6 @@ public class ServidorDespachante extends UnicastRemoteObject implements ServicoD
 
     }
 
-    
     /**
      * MÉTODO 4 - PARA O ALUNO IMPLEMENTAR (1,5 pontos)
      * 
