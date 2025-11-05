@@ -7,12 +7,27 @@ public class InfoMotorista implements Serializable {
     private String nome;
     private String placa;
     private Localizacao posicaoAtual;
+    private Prioridade prioridade;  // ADICIONADO: prioridade do motorista
+    private long timestamp;          // ADICIONADO: timestamp de registro
     
+    // Construtor original (mantém compatibilidade)
     public InfoMotorista(String motoristaId, String nome, String placa, Localizacao posicaoAtual) {
         this.motoristaId = motoristaId;
         this.nome = nome;
         this.placa = placa;
         this.posicaoAtual = posicaoAtual;
+        this.prioridade = Prioridade.STANDARD;  // Padrão: STANDARD
+        this.timestamp = System.currentTimeMillis();
+    }
+    
+    // Construtor com prioridade
+    public InfoMotorista(String motoristaId, String nome, String placa, Localizacao posicaoAtual, Prioridade prioridade) {
+        this.motoristaId = motoristaId;
+        this.nome = nome;
+        this.placa = placa;
+        this.posicaoAtual = posicaoAtual;
+        this.prioridade = prioridade;
+        this.timestamp = System.currentTimeMillis();
     }
     
     public String getMotoristaId() { 
@@ -31,12 +46,24 @@ public class InfoMotorista implements Serializable {
         return posicaoAtual; 
     }
     
+    public Prioridade getPrioridade() {  // ADICIONADO
+        return prioridade;
+    }
+    
+    public long getTimestamp() {  // ADICIONADO
+        return timestamp;
+    }
+    
     public void setPosicaoAtual(Localizacao posicaoAtual) { 
         this.posicaoAtual = posicaoAtual; 
     }
     
+    public void setPrioridade(Prioridade prioridade) {  // ADICIONADO
+        this.prioridade = prioridade;
+    }
+    
     @Override
     public String toString() {
-        return String.format("%s (%s) - %s", nome, motoristaId, placa);
+        return String.format("%s (%s) - %s [%s]", nome, motoristaId, placa, prioridade);
     }
 }
