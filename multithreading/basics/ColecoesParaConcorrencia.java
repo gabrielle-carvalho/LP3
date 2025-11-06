@@ -1,3 +1,4 @@
+package multithreading.basics;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
