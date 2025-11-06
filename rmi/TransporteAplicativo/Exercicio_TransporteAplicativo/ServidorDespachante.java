@@ -25,8 +25,8 @@ public class ServidorDespachante extends UnicastRemoteObject implements ServicoD
         this.corridas = new ConcurrentHashMap<>();
         this.atribuicoes = new ConcurrentHashMap<>();
         this.lockMatching = new ReentrantLock();
-        this.executorMatching = Executors.newFixedThreadPool(10);
-        this.executorTimeout = Executors.newScheduledThreadPool(5);
+        this.executorMatching = Executors.newFixedThreadPool(10); 
+        this.executorTimeout = Executors.newScheduledThreadPool(5); //fila de tarefas agendadas
         
         log("Servidor Despachante iniciado");
     }
@@ -246,21 +246,25 @@ public class ServidorDespachante extends UnicastRemoteObject implements ServicoD
             lockMatching.lock();
             Motorista melhorMotorista = encontrarMelhorMotorista(requisicao);
             if(melhorMotorista==null){
-                // verificarTimeoutMatching(requisicao.getCorridaId());
-                log("nenhum motorista foi encontrado para essa corrida");
+                log("[MATCHING] Nenhum motorista disponível para corrida " + requisicao.getCorridaId());
+                return;
             }
-            else{
-                String atribuicaoId = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-                melhorMotorista.setAtribuicaoAtual(requisicao.getAtribuicaoId());
-                String idcorrida = requisicao.getCorridaId();
-                RequisicaoCorrida corrida = corridas.get(idcorrida);
-                corrida.setMotoristaAtribuido(melhorMotorista.getInfo().getMotoristaId());
-                corrida.setAtribuicaoId(atribuicaoId);
-                Atribuicao atribuicao = atribuicoes.get(atribuicaoId);
-                atribuicoes.put(atribuicaoId, atribuicao);
-                log(String.format ("[MATCHING] Corrida=%s Motorista=%s Distancia=%d Tentativa=1", requisicao.getCorridaId(), requisicao.getMotoristaAtribuido(), calcularDistancia(requisicao.getDestino(), requisicao.getOrigem())));
-                notificarMotorista(melhorMotorista.getInfo().getMotoristaId(), requisicao.getAtribuicaoId());
-            }
+            String atribuicaoId = UUID.randomUUID().toString().substring(0, 8).toUpperCase();//gera id
+            
+            Atribuicao atribuicao = new Atribuicao(atribuicaoId, requisicao.getCorridaId(), melhorMotorista.getInfo().getMotoristaId());
+            atribuicoes.put(atribuicaoId, atribuicao);
+
+            melhorMotorista.setStatus(StatusMotorista.OCUPADO);
+            melhorMotorista.setAtribuicaoAtual(atribuicaoId);
+
+            requisicao.setMotoristaAtribuido(melhorMotorista.getInfo().getMotoristaId());
+            requisicao.setAtribuicaoId(atribuicaoId);
+
+            double distancia = calcularDistancia(melhorMotorista.getInfo().getPosicaoAtual(), requisicao.getOrigem());
+            log(String.format("[MATCHING] Corrida=%s Motorista=%s Distancia=%.2f Tentativa=1", requisicao.getCorridaId(), melhorMotorista.getInfo().getMotoristaId(), distancia));
+
+            notificarMotorista(melhorMotorista.getInfo().getMotoristaId(), requisicao.getAtribuicaoId());
+        
         } catch (Exception e) {
             System.err.println("Erro no servidor: " + e.getMessage());
             e.printStackTrace();
@@ -293,17 +297,37 @@ public class ServidorDespachante extends UnicastRemoteObject implements ServicoD
      * DICA: Mantenha variáveis para melhorMotorista, menorDistancia
      */
     private Motorista encontrarMelhorMotorista(RequisicaoCorrida requisicao) {
-        // TODO: ALUNO DEVE IMPLEMENTAR ESTE MÉTODO
-        for (Motorista motorista : motoristas.values()){
-            if (motorista.isDisponivel()) {
-                double menorDistancia = calcularDistancia(requisicao.getOrigem(), requisicao.getDestino());
-                String idmot = motorista.getInfo().getMotoristaId();
-                Prioridade prioridade = requisicao.getPrioridade();
+        Motorista melhorMotorista=null;
+        double menorDistancia=Double.MAX_VALUE;
 
+        for (Motorista motorista : motoristas.values()){
+            if (!motorista.isDisponivel()) {
+                continue;
             }
-        }
-        
-        throw new UnsupportedOperationException("ALUNO: Implemente o método encontrarMelhorMotorista");
+            double distancia = calcularDistancia(motorista.getInfo().getPosicaoAtual(), requisicao.getOrigem());
+
+            if (melhorMotorista==null) {
+                melhorMotorista = motorista;
+                menorDistancia=distancia;
+                continue;
+            }
+            if(requisicao.getPrioridade() == Prioridade.VIP && melhorMotorista.getInfo().getPrioridade() != Prioridade.VIP){ // prioridades diferentes pega o vip
+                melhorMotorista = motorista;
+                menorDistancia = distancia;
+            }
+            else if (distancia<menorDistancia){ // se a priodade for igual, pega o com menor distancia
+                melhorMotorista = motorista;
+                menorDistancia=distancia;
+            }
+            else{ // se distancia for igual tbm pega o timestamp do tempo disponivel ha mais tempo
+                long timestampMotorista = motorista.getTimestampDisponivel();
+                long timestampMelhor = melhorMotorista.getTimestampDisponivel();
+                if (timestampMelhor>timestampMotorista) {
+                    melhorMotorista = motorista;
+                }
+            }
+        }        
+        return melhorMotorista;
     }
     
     /**
@@ -330,8 +354,7 @@ public class ServidorDespachante extends UnicastRemoteObject implements ServicoD
 
         RequisicaoCorrida corrida = corridas.get(atribuicao.getCorridaId()); // para conseguir acessar dados do passageito e da corrida!
         
-        AtribuicaoCorrida atribuicaoCorrida = new AtribuicaoCorrida(atribuicaoId, corrida.getCorridaId(), corrida.getPassageiro(), 
-        corrida.getOrigem(), corrida.getDestino(), corrida.getPrioridade(), atribuicao.getTimestampAtribuicao());
+        AtribuicaoCorrida atribuicaoCorrida = new AtribuicaoCorrida(atribuicaoId, corrida.getCorridaId(), corrida.getPassageiro(), corrida.getOrigem(), corrida.getDestino(), corrida.getPrioridade(), atribuicao.getTimestampAtribuicao());
 
         try{
             motorista.getCallback().aoAtribuir(atribuicaoCorrida);;
@@ -341,12 +364,11 @@ public class ServidorDespachante extends UnicastRemoteObject implements ServicoD
             tratarFalhaConfirmacao(atribuicaoId);
             return;
         }
-        executorTimeout.schedule(() -> {
+        executorTimeout.schedule(() -> { //agenda uma tarefa futura
             if (!atribuicao.isConfirmada()) {
-                tratarFalhaConfirmacao(atribuicaoId);
+                tratarFalhaConfirmacao(atribuicaoId); // cancela e procura outro motorista
             }
-        }, TIMEOUT_CONFIRMACAO_MS, TimeUnit.MILLISECONDS);
-
+        }, TIMEOUT_CONFIRMACAO_MS, TimeUnit.MILLISECONDS); // Tempo limite de espera em ms
     }
 
     /**
@@ -370,27 +392,32 @@ public class ServidorDespachante extends UnicastRemoteObject implements ServicoD
      * IMPORTANTE: Este método permite retry automático de matching
      */
     private void tratarFalhaConfirmacao(String atribuicaoId) {
-        Motorista motorista = motoristas.get(atribuicaoId);
         Atribuicao atribuicao = atribuicoes.get(atribuicaoId);
-        RequisicaoCorrida corrida = corridas.get(atribuicaoId);
+        Motorista motorista = motoristas.get(atribuicao.getMotoristaId());
+        RequisicaoCorrida corrida = corridas.get(atribuicao.getCorridaId());
         if (atribuicao.isConfirmada()){
             return;
-            log(String.format ("[FALHA] Corrida=%d Motorista=%d Motivo=TimeoutConfirmacao Reatribuindo=true", corrida.getCorridaId(), motorista.getInfo().getMotoristaId()));
         }
+        log(String.format ("[FALHA] Corrida=%s Motorista=%s Motivo=TimeoutConfirmacao Reatribuindo=true", atribuicao.getCorridaId(), atribuicao.getMotoristaId()));
 
-        motorista.setStatus(DISPONIVEL);
+        motorista.setStatus(StatusMotorista.DISPONIVEL);
         motorista.setAtribuicaoAtual(null);
 
-        corrida.setMotoristaAtribuido(null);
-        corrida.setAtribuicaoId(null);
-        corrida.setStatus(PENDENTE);
+        if (corrida != null) {
+            corrida.setMotoristaAtribuido(null);
+            corrida.setAtribuicaoId(null);
+            corrida.setStatus(StatusRequisicao.PENDENTE);
+        }
 
-        atribuicao.remove(atribuicaoId);
-        executorMatching.submit(() -> processarMatching(corrida)); //ver oq é isso!!!!!!!
+        atribuicoes.remove(atribuicaoId);
+        if (corrida!=null){
+            executorMatching.submit(() -> processarMatching(corrida)); //ver oq é isso!!!!!!!
+        // executorMatching   ---	Pool de threads (ExecutorService)
+        // .submit(...)    ---	 Envia uma tarefa para rodar em background
+        // () -> processarMatching(corrida)  ---	Expressão lambda que executa o método
+        // Resultado   ---	 O servidor processa o matching da corrida em paralelo sem bloquear outras operações
+        }
         
-
-        
-        throw new UnsupportedOperationException("ALUNO: Implemente o método tratarFalhaConfirmacao");
     }
     
     // =========================================================================
