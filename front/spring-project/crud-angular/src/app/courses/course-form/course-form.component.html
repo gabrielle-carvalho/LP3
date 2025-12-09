@@ -6,22 +6,32 @@
 
       <mat-form-field class="fill-width">
         <mat-label>Nome</mat-label>
-        <input matInput placeholder="Nome do curso" formControlName="name">
-      </mat-form-field>
+        <input matInput formControlName="name">
+        <mat-hint align="end">{{ form.value.name?.length || 0 }} / 100</mat-hint>
+        <mat-error *ngIf="form.get('name')?.hasError('required')">
+            Nome é obrigatório
+        </mat-error>
+        <mat-error *ngIf="form.get('name')?.hasError('minlength')">
+            Nome precisa ter no mínimo 5 caracteres
+        </mat-error>
+    </mat-form-field>
 
-      <mat-form-field class="fill-width">
-        <mat-label>Categoria</mat-label>
-        <mat-select formControlName="category">
+    <mat-form-field class="fill-width">
+      <mat-label>Categoria</mat-label>
+      <mat-select formControlName="category">
           <mat-option value="Front-end">Front-end</mat-option>
           <mat-option value="Back-end">Back-end</mat-option>
-        </mat-select>
-      </mat-form-field>
+      </mat-select>
+      <mat-error *ngIf="form.get('category')?.hasError('required')">
+          Categoria é obrigatória
+      </mat-error>
+  </mat-form-field>
 
     </form>
   </mat-card-content>
 
   <mat-card-actions>
-    <button mat-raised-button color="primary" (click)="onSubmit()">Salvar</button>
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="form.invalid">Salvar</button>
     <button mat-raised-button (click)="onCancel()">Cancelar</button>
   </mat-card-actions>
 </mat-card>

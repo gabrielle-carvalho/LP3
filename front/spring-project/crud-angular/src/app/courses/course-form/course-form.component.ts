@@ -9,6 +9,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CoursesService } from '../services/courses.service';
 import { Location } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-course-form',
@@ -37,8 +38,8 @@ export class CourseFormComponent {
     private location: Location       // Para voltar
   ) {
     this.form = this.formBuilder.group({
-      name: [null],
-      category: [null]
+      name: [null, [Validators.required, Validators.minLength(5)]],
+      category: [null, [Validators.required]]
     });
   }
 
