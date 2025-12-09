@@ -1,0 +1,9 @@
+Criar entidades iniciais: Produto
+Configurar repositórios e testes com dados iniciais
+Criar CRUD /produtos com filtros por categoria e nome
+Implementar upload de imagem (máx. 2MB)
+Relacionar Produto ↔ Usuario com @ManyToOne
+Criar tela de Listagem e Cadastro de Produtos
+Implementar Sistema de Favoritos (LocalStorage)
+Conectar formulários Angular às APIs
+

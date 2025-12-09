@@ -1,0 +1,53 @@
+<button (click)="onAdd()" style="padding: 20px; background: red; color: white; font-size: 20px;">
+  TESTE DE NAVEGAÇÃO
+</button>
+<br><br>
+<mat-card>
+  <mat-toolbar color="primary">
+    <span>Cursos Disponíveis</span>
+    <span class="spacer"></span> <button mat-icon-button aria-label="Adicionar curso" (click)="onAdd()">
+      <mat-icon>add</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <div *ngIf="courses$ | async as courses; else loading">
+
+    <table mat-table [dataSource]="courses" class="mat-elevation-z8">
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef> Curso </th>
+        <td mat-cell *matCellDef="let course"> {{ course.name }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="category">
+        <th mat-header-cell *matHeaderCellDef> Categoria </th>
+        <td mat-cell *matCellDef="let course">
+          {{ course.category }}
+          </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef class="action-column-header">
+          Ações </th>
+        <td mat-cell *matCellDef="let course" class="action-column">
+          <button mat-icon-button color="primary" aria-label="Editar curso">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" aria-label="Remover curso">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+  </div>
+
+  <ng-template #loading>
+    <div class="loading-spinner">
+      <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+    </div>
+  </ng-template>
+</mat-card>
