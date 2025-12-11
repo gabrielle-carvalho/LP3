@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -8,7 +8,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CoursesService } from '../services/courses.service';
-import { Location } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 
 @Component({
   selector: 'app-course-form',
@@ -20,7 +20,8 @@ import { Location } from '@angular/common';
     MatCardModule,       // Resolve mat-card, mat-card-content, mat-card-actions
     MatToolbarModule,    // Resolve mat-toolbar
     MatButtonModule,     // Resolve botões com mat-raised-button
-    MatSelectModule      // Resolve mat-select e mat-option
+    MatSelectModule,      // Resolve mat-select e mat-option
+    CommonModule,
   ],
   templateUrl: './course-form.component.html',
   styleUrl: './course-form.component.scss' // Ou .css, dependendo do seu projeto
@@ -37,8 +38,8 @@ export class CourseFormComponent {
     private location: Location       // Para voltar
   ) {
     this.form = this.formBuilder.group({
-      name: [null],
-      category: [null]
+      name: [null, [Validators.required, Validators.minLength(5)]],
+      category: [null, [Validators.required]]
     });
   }
 

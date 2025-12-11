@@ -5,7 +5,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
+import com.uneb.lp3.spring_project.enums.Category;
 import com.uneb.lp3.spring_project.model.Course;
+import com.uneb.lp3.spring_project.model.Lesson;
 import com.uneb.lp3.spring_project.repository.CourseRepository;
 
 @SpringBootApplication
@@ -18,13 +20,22 @@ public class SpringProjectApplication {
     @Bean
     CommandLineRunner initDatabase(CourseRepository courseRepository) {
         return args -> {
-            courseRepository.deleteAll(); // Limpa o banco antes de começar
+            courseRepository.deleteAll();
 
-            Course c = new Course();
-            c.setName("Curso de Angular com Spring");
-            c.setCategory("Front-end");
+            // Cria 20 cursos para testar a paginação
+            for (int i = 0; i < 20; i++) {
+                Course c = new Course();
+                c.setName("Curso Exemplo Paginação " + i);
+                c.setCategory(Category.BACK_END);
 
-            courseRepository.save(c); // Salva no banco de dados
+                Lesson l = new Lesson();
+                l.setName("Aula Intro " + i);
+                l.setLinkLesson("https://youtu.be/" + i);
+                l.setCourse(c);
+                c.getLessons().add(l);
+
+                courseRepository.save(c);
+            }
         };
     }
 }
