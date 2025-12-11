@@ -1,5 +1,5 @@
 <mat-card>
-  <mat-toolbar color="primary">Cadastrar Curso</mat-toolbar>
+  <mat-toolbar color="primary">Detalhes do Curso</mat-toolbar>
 
   <mat-card-content>
     <form [formGroup]="form" class="min-width">
@@ -7,42 +7,54 @@
       <mat-form-field class="fill-width">
         <mat-label>Nome</mat-label>
         <input matInput formControlName="name">
-        <mat-hint align="end">{{ form.value.name?.length || 0 }} / 100</mat-hint>
-        <mat-error *ngIf="form.get('name')?.hasError('required')">
-            Nome é obrigatório
-        </mat-error>
-        <mat-error *ngIf="form.get('name')?.hasError('minlength')">
-            Nome precisa ter no mínimo 5 caracteres
-        </mat-error>
-    </mat-form-field>
-        <input matInput formControlName="name">
-        <mat-hint align="end">{{ form.value.name?.length || 0 }} / 100</mat-hint>
-        <mat-error *ngIf="form.get('name')?.hasError('required')">
-            Nome é obrigatório
-        </mat-error>
-        <mat-error *ngIf="form.get('name')?.hasError('minlength')">
-            Nome precisa ter no mínimo 5 caracteres
-        </mat-error>
-    </mat-form-field>
+        <mat-hint align="end">{{ form.get('name')?.value?.length || 0 }} / 100</mat-hint>
+        <mat-error *ngIf="form.get('name')?.hasError('required')">Nome é obrigatório</mat-error>
+        <mat-error *ngIf="form.get('name')?.hasError('minlength')">Mínimo 5 caracteres</mat-error>
+      </mat-form-field>
 
       <mat-form-field class="fill-width">
         <mat-label>Categoria</mat-label>
         <mat-select formControlName="category">
-            <mat-option value="Front-end">Front-end</mat-option>
-            <mat-option value="Back-end">Back-end</mat-option>
+          <mat-option value="Front-end">Front-end</mat-option>
+          <mat-option value="Back-end">Back-end</mat-option>
         </mat-select>
-        <mat-error *ngIf="form.get('category')?.hasError('required')">
-            Categoria é obrigatória
-        </mat-error>
-    </mat-form-field>
+        <mat-error *ngIf="form.get('category')?.hasError('required')">Categoria é obrigatória</mat-error>
+      </mat-form-field>
+
+      <mat-toolbar>
+        <span>Aulas</span>
+        <button mat-icon-button color="accent" (click)="addNewLesson()">
+          <mat-icon>add</mat-icon>
+        </button>
+      </mat-toolbar>
+
+      <div formArrayName="lessons" *ngFor="let lesson of getLessonsFormArray(); let i = index">
+        <div [formGroupName]="i" style="display: flex; gap: 10px; align-items: center;">
+
+          <mat-form-field class="fill-width">
+            <mat-label>Título da Aula</mat-label>
+            <input matInput formControlName="name">
+            <mat-error *ngIf="getLessonsFormArray()[i].get('name')?.hasError('required')">Obrigatório</mat-error>
+          </mat-form-field>
+
+          <mat-form-field class="fill-width">
+            <mat-label>Link URL</mat-label>
+            <input matInput formControlName="linkLesson">
+            <mat-error *ngIf="getLessonsFormArray()[i].get('linkLesson')?.hasError('required')">Obrigatório</mat-error>
+          </mat-form-field>
+
+          <button mat-icon-button color="warn" (click)="removeLesson(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+
+        </div>
+      </div>
 
     </form>
   </mat-card-content>
 
   <mat-card-actions>
-    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="form.invalid">
-        Salvar
-    </button>
+    <button mat-raised-button color="primary" (click)="onSubmit()">Salvar</button>
     <button mat-raised-button (click)="onCancel()">Cancelar</button>
   </mat-card-actions>
 </mat-card>
