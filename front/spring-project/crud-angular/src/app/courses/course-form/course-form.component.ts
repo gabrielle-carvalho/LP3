@@ -40,6 +40,8 @@ export class CourseFormComponent {
     this.form = this.formBuilder.group({
       name: [null, [Validators.required, Validators.minLength(5)]],
       category: [null, [Validators.required]]
+      name: [null, [Validators.required, Validators.minLength(5)]],
+      category: [null, [Validators.required]]
     });
   }
 

@@ -15,6 +15,15 @@
             Nome precisa ter no mínimo 5 caracteres
         </mat-error>
     </mat-form-field>
+        <input matInput formControlName="name">
+        <mat-hint align="end">{{ form.value.name?.length || 0 }} / 100</mat-hint>
+        <mat-error *ngIf="form.get('name')?.hasError('required')">
+            Nome é obrigatório
+        </mat-error>
+        <mat-error *ngIf="form.get('name')?.hasError('minlength')">
+            Nome precisa ter no mínimo 5 caracteres
+        </mat-error>
+    </mat-form-field>
 
       <mat-form-field class="fill-width">
         <mat-label>Categoria</mat-label>
