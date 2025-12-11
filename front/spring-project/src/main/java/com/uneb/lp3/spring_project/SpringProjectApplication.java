@@ -10,16 +10,16 @@ import com.uneb.lp3.spring_project.model.Course;
 import com.uneb.lp3.spring_project.model.Lesson;
 import com.uneb.lp3.spring_project.repository.CourseRepository;
 
-@SpringBootApplication
+@SpringBootApplication //marca a classe como ponto de entrada pra um aplicacao spring boot
 public class SpringProjectApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(SpringProjectApplication.class, args);
     }
 
-    @Bean
+    @Bean // diz pro spring criar, gerenciar e intetar instancias de uma classe
     CommandLineRunner initDatabase(CourseRepository courseRepository) {
-        return args -> {
+        return args -> { // retorna o objeto desejado, o string que gerencia as instancias dele
             courseRepository.deleteAll();
 
             // Cria 20 cursos para testar a paginação

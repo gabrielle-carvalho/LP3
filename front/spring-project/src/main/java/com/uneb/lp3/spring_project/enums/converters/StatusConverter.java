@@ -8,6 +8,9 @@ import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
 @Converter(autoApply = true)
+// Ela diz ao Hibernate: "Sempre que você encontrar um campo do tipo Category em uma entidade, 
+// use esta classe para converter antes de ir ao banco e ao voltar do banco". 
+// Sem isso, o JPA tentaria salvar o ordinal (0, 1) ou o nome da constante (FRONT_END), e não o valor que queremos ("Front-end").
 public class StatusConverter implements AttributeConverter<Status, String> {
 
     @Override
@@ -30,4 +33,3 @@ public class StatusConverter implements AttributeConverter<Status, String> {
     }
 }
 
-// A anotação @Converter(autoApply = true) é fundamental. Ela diz ao Hibernate: "Sempre que você encontrar um campo do tipo Category em uma entidade, use esta classe para converter antes de ir ao banco e ao voltar do banco". Sem isso, o JPA tentaria salvar o ordinal (0, 1) ou o nome da constante (FRONT_END), e não o valor que queremos ("Front-end").

@@ -24,9 +24,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-@Data
-@Entity
-@SQLDelete(sql = "UPDATE Course SET status = 'Inativo' WHERE id = ?")
+@Data //  gera automaticamente métodos getters, setters, toString(), equals() e hashCode() para campos de classes
+@Entity //marca classe como unidade persistente, corresponde a uma tabela do banco
+@SQLDelete(sql = "UPDATE Course SET status = 'Inativo' WHERE id = ?") // para evitar apagar itens do banco e evitar deixar a aplicacao lenta
 @SQLRestriction("status = 'Ativo'")
 public class Course {
 
@@ -52,7 +52,7 @@ public class Course {
 
     // Relacionamento OneToMany (Um Curso para Muitas Aulas)
     // cascade = CascadeType.ALL: Se eu salvar/deletar o Curso, salva/deleta as Aulas junto.
-    // orphanRemoval = true: Se eu remover uma aula da lista, ela some do banco.
+    // orphanRemoval = true: Se eu remover uma aula da lista, ela some do banco. marca entidades "filhas" para serem excluídas quando não tem qualquer outro vinculo com uma entidade pai
     // mappedBy = "course": Quem manda na relação é o atributo 'course' lá na classe Lesson.
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "course")
     private List<Lesson> lessons = new ArrayList<>();

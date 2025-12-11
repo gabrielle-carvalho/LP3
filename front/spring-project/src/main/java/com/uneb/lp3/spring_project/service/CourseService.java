@@ -21,8 +21,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
-@Validated
-@Service
+@Validated // indica as validacoes de beans
+@Service // deine que essa classe é um serviço 
 public class CourseService {
 
     private final CourseRepository courseRepository;
